@@ -23,7 +23,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
 #ifdef PLUGIN_AUTOHR
                 { "Author", PLUGIN_AUTOHR },
 #endif // PLUGIN_AUTOHR
-                    //{ "Key", "Value" }
+                { "Url", "https://github.com/cngege/DispenserGetLavaFromCauldron" }
             }
         );
         break;

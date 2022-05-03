@@ -9,7 +9,7 @@
 #define PLUGIN_NAME                 "DispenserGetLavaFromCauldron"
 #define PLUGIN_INTRODUCTION         "用发射器向装有岩浆的炼药锅发射空桶以装岩浆"
 #define PLUGIN_AUTOHR               "CNGEGE"
-#define PLUGIN_VERSION_MAJOR        1
+#define PLUGIN_VERSION_MAJOR        2
 #define PLUGIN_VERSION_MINOR        0
 #define PLUGIN_VERSION_REVISION     0
 #define PLUGIN_VERSION_BUILD        0

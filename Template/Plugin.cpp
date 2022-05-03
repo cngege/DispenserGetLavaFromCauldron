@@ -9,13 +9,13 @@
 #include <MC/Player.hpp>
 #include <MC/ItemStack.hpp>
 #include <MC/DispenserBlock.hpp>
-//#include <MC/CauldronBlock.hpp>
-//#include <MC/CauldronBlockActor.hpp>
 #include <MC/Container.hpp>
 #include <MC/Item.hpp>
 #include "Version.h"
 #include <LLAPI.h>
 #include <ServerAPI.h>
+
+//#pragma warning(suppress : 4996)
 
 Logger DispenserGetLavaFromCauldronLogger("DispenserGetLavaFromCauldron");
 
@@ -45,6 +45,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
     //DispenserGetLavaFromCauldronLogger.info("物品类型:{0}", a5->getTypeName());
     //DispenserGetLavaFromCauldronLogger.info("方块类型:{0}", a2->getBlock(pos).getTypeName());
 
+    //空桶 从 岩浆炼药锅 中获取 岩浆桶
     //1.判断是不是 空的桶 并且 炼药锅是盛着岩浆的
     if (a5->getTypeName() == "minecraft:bucket" && a2->getBlock(pos).getTypeName() == "minecraft:lava_cauldron")
     {
@@ -58,6 +59,29 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
         bool spawned = a6->addItem(*lava_bucket);
 
         //5. 生成失败 则将岩浆桶发射出去
+        if (!spawned)
+        {
+            return DispenserBlock::ejectItem(*a2, *a3, (unsigned char)a4, *lava_bucket);
+        }
+        return;
+    }
+
+    //岩浆桶 将岩浆倒入空炼药锅
+    //1. 判断是不是 岩浆桶 并且 炼药锅是空的
+    if (a5->getTypeName() == "minecraft:lava_bucket" && a2->getBlock(pos).getTypeName() == "minecraft:cauldron")
+    {
+        //2. 移除岩浆桶
+        a5->remove(1);
+
+        //3. 空炼药锅变成岩浆炼药锅
+        Level::setBlock(pos, a2->getDimensionId(), std::string("minecraft:lava_cauldron"), NULL);
+
+        //4. 生成空桶
+        ItemStack* lava_bucket = ItemStack::create("minecraft:bucket");
+        bool spawned = a6->addItem(*lava_bucket);
+        
+        //5. 由于是 岩浆桶 变 空桶 所以不考虑添加物品失败的情况
+        //   算了 我还是加上去,虽然理论上是不会添加失败的
         if (!spawned)
         {
             return DispenserBlock::ejectItem(*a2, *a3, (unsigned char)a4, *lava_bucket);
