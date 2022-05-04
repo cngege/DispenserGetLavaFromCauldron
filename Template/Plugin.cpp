@@ -14,10 +14,10 @@
 #include <MC/CauldronBlockActor.hpp>
 #include <MC/CauldronBlock.hpp>
 #include <MC/Item.hpp>
+#include <MC/CompoundTag.hpp>
 #include "Version.h"
 #include <LLAPI.h>
 #include <ServerAPI.h>
-
 //#pragma warning(suppress : 4996)
 
 Logger DispenserGetLavaFromCauldronLogger("DispenserGetLavaFromCauldron");
@@ -34,6 +34,13 @@ inline void CheckProtocolVersion() {
 #endif // TARGET_BDS_PROTOCOL_VERSION
 }
 
+enum CauldronLiquidType
+{
+    water = 0,
+    lava = 1
+};
+
+
 void PluginInit()
 {
     CheckProtocolVersion();
@@ -44,7 +51,8 @@ void PluginInit()
 THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVItemStack@@AEAVContainer@@H@Z", DispenserBlock* a1,
     BlockSource* a2, Vec3* a3, FaceID a4, ItemStack* a5, Container* a6, unsigned int a7) {
     //auto pos = a3->toBlockPos();              //函数 有问题 位置有偏移
-    BlockPos pos = BlockPos::BlockPos(*a3);
+    //BlockPos pos = BlockPos::BlockPos(*a3);
+    BlockPos pos(*a3);
 
     //DispenserGetLavaFromCauldronLogger.info("物品类型:{0}", a5->getTypeName());
     //DispenserGetLavaFromCauldronLogger.info("方块类型:{0}", a2->getBlock(pos).getTypeName());
@@ -74,28 +82,39 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
     //1. 判断是不是 岩浆桶 并且 炼药锅是空的
     if (a5->getTypeName() == "minecraft:lava_bucket" && a2->getBlock(pos).getTypeName() == "minecraft:cauldron")
     {
-        //2. 移除岩浆桶
-        a5->remove(1);
+        auto block = const_cast<Block*>(&a2->getBlock(pos));
 
-        //3. 空炼药锅变成岩浆炼药锅
-        
-        //这个方法只能将炼药锅变成岩浆炼药锅的类型,但里面没有岩浆
-        //Level::setBlock(pos, a2->getDimensionId(), "minecraft:lava_cauldron", NULL);
+        //2. 获取炼药锅中的物品情况
+        auto nbt = block->getNbt();
+        auto nbtTag = nbt.get();
+        auto statenbt = nbtTag->getCompoundTag("states");
+        auto level = statenbt->getInt("fill_level");
+        /* std::string snbt = nbtTag->toJson(0); */
 
-        auto Cauldron = (CauldronBlock*)(&a2->getBlock(pos).getLegacyBlock());
-        Cauldron->setLiquidLevel(*a2, pos, 6, (CauldronLiquidType)1);
-
-        //4. 生成空桶
-        ItemStack* lava_bucket = ItemStack::create("minecraft:bucket");
-        bool spawned = a6->addItem(*lava_bucket);
-        
-        //5. 由于是 岩浆桶 变 空桶 所以不考虑添加物品失败的情况
-        //   算了 我还是加上去,虽然理论上是不会添加失败的
-        if (!spawned)
+        //3. 如果炼药锅中的物品是空的才装岩浆
+        if (!level)
         {
-            return DispenserBlock::ejectItem(*a2, *a3, (unsigned char)a4, *lava_bucket);
+            auto Cauldron = (CauldronBlock*)(&a2->getBlock(pos).getLegacyBlock());
+
+            //4. 移除岩浆桶
+            a5->remove(1);
+
+            //5. 空炼药锅变成岩浆炼药锅 不能使用 Level::setBlock
+            Cauldron->setLiquidLevel(*a2, pos, 6, (CauldronLiquidType)1);
+
+            //6. 生成空桶
+            ItemStack* lava_bucket = ItemStack::create("minecraft:bucket");
+            bool spawned = a6->addItem(*lava_bucket);
+
+            //7. 由于是 岩浆桶 变 空桶 所以不考虑添加物品失败的情况
+            //   算了 我还是加上去,虽然理论上是不会添加失败的
+            if (!spawned)
+            {
+                return DispenserBlock::ejectItem(*a2, *a3, (unsigned char)a4, *lava_bucket);
+            }
+            return;
         }
-        return;
+
     }
 
     return original(a1, a2, a3, a4, a5, a6, a7);
