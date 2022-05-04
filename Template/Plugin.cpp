@@ -5,11 +5,14 @@
 #include <MC/BlockInstance.hpp>
 #include <MC/Block.hpp>
 #include <MC/BlockSource.hpp>
+#include <MC/BlockLegacy.hpp>
 #include <MC/Actor.hpp>
 #include <MC/Player.hpp>
 #include <MC/ItemStack.hpp>
 #include <MC/DispenserBlock.hpp>
 #include <MC/Container.hpp>
+#include <MC/CauldronBlockActor.hpp>
+#include <MC/CauldronBlock.hpp>
 #include <MC/Item.hpp>
 #include "Version.h"
 #include <LLAPI.h>
@@ -40,7 +43,8 @@ void PluginInit()
 // a7 发射的物品所在的格子数
 THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVItemStack@@AEAVContainer@@H@Z", DispenserBlock* a1,
     BlockSource* a2, Vec3* a3, FaceID a4, ItemStack* a5, Container* a6, unsigned int a7) {
-    auto pos = a3->toBlockPos();
+    //auto pos = a3->toBlockPos();              //函数 有问题 位置有偏移
+    BlockPos pos = BlockPos::BlockPos(*a3);
 
     //DispenserGetLavaFromCauldronLogger.info("物品类型:{0}", a5->getTypeName());
     //DispenserGetLavaFromCauldronLogger.info("方块类型:{0}", a2->getBlock(pos).getTypeName());
@@ -53,7 +57,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
         a5->remove(1);
 
         //3. 岩浆炼药锅变成空炼药锅(minecraft:cauldron)
-        Level::setBlock(pos, a2->getDimensionId(), std::string("minecraft:cauldron"), NULL);
+        Level::setBlock(pos, a2->getDimensionId(), "minecraft:cauldron", NULL);
         //4. 生成岩浆桶
         ItemStack* lava_bucket = ItemStack::create("minecraft:lava_bucket");
         bool spawned = a6->addItem(*lava_bucket);
@@ -74,7 +78,12 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
         a5->remove(1);
 
         //3. 空炼药锅变成岩浆炼药锅
-        Level::setBlock(pos, a2->getDimensionId(), std::string("minecraft:lava_cauldron"), NULL);
+        
+        //这个方法只能将炼药锅变成岩浆炼药锅的类型,但里面没有岩浆
+        //Level::setBlock(pos, a2->getDimensionId(), "minecraft:lava_cauldron", NULL);
+
+        auto Cauldron = (CauldronBlock*)(&a2->getBlock(pos).getLegacyBlock());
+        Cauldron->setLiquidLevel(*a2, pos, 6, (CauldronLiquidType)1);
 
         //4. 生成空桶
         ItemStack* lava_bucket = ItemStack::create("minecraft:bucket");

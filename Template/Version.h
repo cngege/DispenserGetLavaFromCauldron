@@ -7,11 +7,11 @@
 // Plugin Information, used in dllmain.cpp for register plugin
 //static_assert(false, "Please modify your plugin registration details and delete this line");
 #define PLUGIN_NAME                 "DispenserGetLavaFromCauldron"
-#define PLUGIN_INTRODUCTION         "用发射器向装有岩浆的炼药锅发射空桶以装岩浆"
+#define PLUGIN_INTRODUCTION         "用发射器向装有岩浆的炼药锅发射空桶以装岩浆/反之亦然"
 #define PLUGIN_AUTOHR               "CNGEGE"
 #define PLUGIN_VERSION_MAJOR        2
-#define PLUGIN_VERSION_MINOR        0
-#define PLUGIN_VERSION_REVISION     0
+#define PLUGIN_VERSION_MINOR        1
+#define PLUGIN_VERSION_REVISION     1
 #define PLUGIN_VERSION_BUILD        0
 #define PLUGIN_VERSION_STATUS       PLUGIN_VERSION_DEV
 
