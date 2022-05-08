@@ -59,7 +59,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
 
     //空桶 从 岩浆炼药锅 中获取 岩浆桶
     //1.判断是不是 空的桶 并且 炼药锅是盛着岩浆的
-    if (a5->getTypeName() == "minecraft:bucket" && a2->getBlock(pos).getTypeName() == "minecraft:lava_cauldron")
+    if (a1->getTypeName() == "minecraft:dispenser" && a5->getTypeName() == "minecraft:bucket" && a2->getBlock(pos).getTypeName() == "minecraft:lava_cauldron")
     {
         //2. 移除空桶
         a5->remove(1);
@@ -70,7 +70,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
         ItemStack* lava_bucket = ItemStack::create("minecraft:lava_bucket");
         bool spawned = a6->addItem(*lava_bucket);
 
-        //5. 生成失败 则将岩浆桶发射出去
+        //5. 生成失败 也就是容器内满了 则将岩浆桶发射出去
         if (!spawned)
         {
             return DispenserBlock::ejectItem(*a2, *a3, (unsigned char)a4, *lava_bucket);
@@ -80,7 +80,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
 
     //岩浆桶 将岩浆倒入空炼药锅
     //1. 判断是不是 岩浆桶 并且 炼药锅是空的
-    if (a5->getTypeName() == "minecraft:lava_bucket" && a2->getBlock(pos).getTypeName() == "minecraft:cauldron")
+    if (a1->getTypeName() == "minecraft:dispenser" && a5->getTypeName() == "minecraft:lava_bucket" && a2->getBlock(pos).getTypeName() == "minecraft:cauldron")
     {
         auto block = const_cast<Block*>(&a2->getBlock(pos));
 
