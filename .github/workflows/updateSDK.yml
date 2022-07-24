@@ -15,7 +15,7 @@ jobs:
       uses: actions/checkout@v2.4.0
       
     - name: Update SDK
-      run: git submodule update --recursive --remote
+      run: git submodule update --init --recursive --remote
       
     - name: Push
       run: |
