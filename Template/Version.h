@@ -9,11 +9,11 @@
 #define PLUGIN_NAME                 "DispenserGetLavaFromCauldron"
 #define PLUGIN_INTRODUCTION         "用发射器向装有岩浆的炼药锅发射空桶以装岩浆/反之亦然"
 #define PLUGIN_AUTOHR               "CNGEGE"
-#define PLUGIN_VERSION_MAJOR        2
+#define PLUGIN_VERSION_MAJOR        3
 #define PLUGIN_VERSION_MINOR        1
-#define PLUGIN_VERSION_REVISION     3
+#define PLUGIN_VERSION_REVISION     0
 #define PLUGIN_VERSION_BUILD        0
-#define PLUGIN_VERSION_STATUS       PLUGIN_VERSION_DEV
+#define PLUGIN_VERSION_STATUS       PLUGIN_VERSION_BETA
 
 //#define TARGET_BDS_PROTOCOL_VERSION 503
 // used by github actions(TODO)

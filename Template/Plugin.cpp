@@ -46,7 +46,7 @@ void PluginInit()
     CheckProtocolVersion();
 
 }
-
+/*
 // a7 发射的物品所在的格子数
 THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVItemStack@@AEAVContainer@@H@Z", DispenserBlock* a1,
     BlockSource* a2, Vec3* a3, FaceID a4, ItemStack* a5, Container* a6, unsigned int a7) {
@@ -89,7 +89,7 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
         auto nbtTag = nbt.get();
         auto statenbt = nbtTag->getCompoundTag("states");
         auto level = statenbt->getInt("fill_level");
-        /* std::string snbt = nbtTag->toJson(0); */
+        // std::string snbt = nbtTag->toJson(0);
 
         //3. 如果炼药锅中的物品是空的才装岩浆
         if (!level)
@@ -118,4 +118,43 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
     }
 
     return original(a1, a2, a3, a4, a5, a6, a7);
+}
+*/
+
+
+// a4  发射物品在容器中的位置 0开始
+// ret 是否拦截发射 true不发射
+THook(bool, "?dispense@Item@@UEBA_NAEAVBlockSource@@AEAVContainer@@HAEBVVec3@@E@Z", Item* thi, BlockSource* a2, Container* a3, int a4, Vec3* a5, unsigned char a6)
+{
+    BlockPos pos(*a5);
+
+    auto itemstack = a3->getSlot(a4);
+    //发射的物品 名称
+    auto itemN = itemstack->getTypeName();
+    //发射器对着的方块 名称
+    auto blockN = a2->getBlock(pos).getTypeName();
+    DispenserGetLavaFromCauldronLogger.info("发射物品名:{},发射方块名称:{}", itemN, blockN);
+    //空桶 从 岩浆炼药锅 中获取 岩浆桶
+    //1.判断是不是 空的桶 并且 炼药锅是盛着岩浆的
+    if (itemN == "minecraft:bucket" && blockN == "minecraft:lava_cauldron")
+    {
+        //2. 移除空桶
+        itemstack->remove(1);
+
+        //3. 岩浆炼药锅变成空炼药锅(minecraft:cauldron)
+        Level::setBlock(pos, a2->getDimensionId(), "minecraft:cauldron", NULL);
+        //4. 生成岩浆桶
+        ItemStack* lava_bucket = ItemStack::create("minecraft:lava_bucket");
+        bool spawned = a3->addItem(*lava_bucket);
+
+        //5. 生成失败 也就是容器内满了 则将岩浆桶发射出去
+        if (!spawned)
+        {
+            DispenserBlock::ejectItem(*a2, *a5, a6, *lava_bucket);
+            return true;
+        }
+        return true;
+    }
+
+    return original(thi, a2, a3, a4, a5, a6);
 }
