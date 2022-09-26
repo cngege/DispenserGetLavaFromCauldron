@@ -14,6 +14,7 @@
 #include <MC/CauldronBlockActor.hpp>
 #include <MC/CauldronBlock.hpp>
 #include <MC/Item.hpp>
+#include <MC/BucketItem.hpp>
 #include <MC/CompoundTag.hpp>
 #include "Version.h"
 #include <LLAPI.h>
@@ -44,7 +45,6 @@ enum CauldronLiquidType
 void PluginInit()
 {
     CheckProtocolVersion();
-
 }
 /*
 // a7 发射的物品所在的格子数
@@ -121,10 +121,10 @@ THook(void, "?ejectItem@DispenserBlock@@IEBAXAEAVBlockSource@@AEBVVec3@@EAEBVIte
 }
 */
 
-
+// 直接Hook 桶被发射的事件
 // a4  发射物品在容器中的位置 0开始
 // ret 是否拦截发射 true不发射
-THook(bool, "?dispense@Item@@UEBA_NAEAVBlockSource@@AEAVContainer@@HAEBVVec3@@E@Z", Item* thi, BlockSource* a2, Container* a3, int a4, Vec3* a5, unsigned char a6)
+THook(bool, "?dispense@BucketItem@@UEBA_NAEAVBlockSource@@AEAVContainer@@HAEBVVec3@@E@Z", BucketItem* thi, BlockSource* a2, Container* a3, int a4, Vec3* a5, unsigned char a6)
 {
     BlockPos pos(*a5);
 
@@ -133,7 +133,7 @@ THook(bool, "?dispense@Item@@UEBA_NAEAVBlockSource@@AEAVContainer@@HAEBVVec3@@E@
     auto itemN = itemstack->getTypeName();
     //发射器对着的方块 名称
     auto blockN = a2->getBlock(pos).getTypeName();
-    DispenserGetLavaFromCauldronLogger.info("发射物品名:{},发射方块名称:{}", itemN, blockN);
+    //DispenserGetLavaFromCauldronLogger.info("发射物品名:{},发射方块名称:{}", itemN, blockN);
     //空桶 从 岩浆炼药锅 中获取 岩浆桶
     //1.判断是不是 空的桶 并且 炼药锅是盛着岩浆的
     if (itemN == "minecraft:bucket" && blockN == "minecraft:lava_cauldron")
