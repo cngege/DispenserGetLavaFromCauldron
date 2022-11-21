@@ -21,7 +21,8 @@
 #include <ServerAPI.h>
 //#pragma warning(suppress : 4996)
 
-Logger DispenserGetLavaFromCauldronLogger("DispenserGetLavaFromCauldron");
+//Logger DispenserGetLavaFromCauldronLogger("DispenserGetLavaFromCauldron");
+void AutoUprade(const std::string minebbs_resid);
 
 inline void CheckProtocolVersion() {
 #ifdef TARGET_BDS_PROTOCOL_VERSION
@@ -34,17 +35,18 @@ inline void CheckProtocolVersion() {
     }
 #endif // TARGET_BDS_PROTOCOL_VERSION
 }
-
+/*
 enum CauldronLiquidType
 {
     water = 0,
     lava = 1
 };
-
+*/
 
 void PluginInit()
 {
     CheckProtocolVersion();
+    AutoUprade("4049");
 }
 /*
 // a7 发射的物品所在的格子数
